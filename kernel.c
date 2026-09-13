@@ -4,6 +4,12 @@ typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;
 typedef uint32_t size_t;
 
+#define PANIC(fmt, ...)                                                         \
+    do{                                                                         \
+        printf("PANIC: %s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__);   \
+        while(1);                                                               \
+    }while(0)
+
 extern char __bss[], __bss_end[], __stack_top[];
 
 struct sbiret sbi_call(long arg0, long arg1, long arg2, long arg3, long arg4, long arg5, long fid, long eid) {
@@ -42,9 +48,11 @@ void kernel_main(void) {
     memset(s1, 'g',3);
     printf("%s, memset then strcmp result:%d\n", s1, strcmp(s1, "ggg"));
     printf("%s,%s, strcmp result:%d\n", s1, s2, strcmp(s1, s2));
-    for (;;) {
-        __asm__ __volatile__("wfi");
-    }
+    // for (;;) {
+    //     __asm__ __volatile__("wfi");
+    // }
+    PANIC("booted!");
+    printf("unreachable here!\n");
 }
 
 __attribute__((section(".text.boot")))
