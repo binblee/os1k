@@ -28,76 +28,20 @@ void putchar(char ch) {
     sbi_call(ch, 0, 0, 0, 0, 0, 0, 1 /* Console Putchar */);
 }
 
-void printf(const char* format, ...){
-    va_list args;
-    va_start(args, format);
-    while(*format){
-        if (*format == '%'){
-            format ++;
-            switch (*format){
-                case 's':{
-                    const char* str = va_arg(args, char*);
-                    while(*str){
-                        putchar(*str);
-                        str++;
-                    }
-                    break;
-                }
-                case 'd':{
-                    int value = va_arg(args, int);
-                    unsigned magnitude = value;
-                    if(value < 0){
-                        magnitude = - magnitude;
-                        putchar('-');
-                    }
-                    unsigned divisor = 1;
-                    while(magnitude / divisor > 0){
-                        divisor *= 10;
-                    }
-                    if(divisor == 1)
-                        putchar('0');
-                    else
-                        divisor /= 10;
-                    const char digits[]="0123456789";
-                    while(divisor > 0){
-                        putchar(digits[magnitude / divisor]);
-                        magnitude %= divisor;
-                        divisor /= 10;
-                    }
-                    break;
-                }
-                case 'x':{
-                    // size 32, print MSB-first
-                    unsigned value = va_arg(args,unsigned);
-                    for(int i=7; i>=0; i--){
-                        unsigned nibble = (value >> (i*4)) & 0xf;
-                        putchar("0123456789abcdef"[nibble]);
-                    }
-                    break;
-                }
-                case '%':
-                case '\0':
-                    putchar('%');
-                    break;
-            }
-        }else{
-            putchar(*format);
-        }
-        format ++;
-    }
-}
-
-void *memset(void *buf, char c, size_t n) {
-    uint8_t *p = (uint8_t *) buf;
-    while (n--)
-        *p ++ = c;
-    return buf;
-}
-
 void kernel_main(void) {
     printf("\n\nHello %s\n", "World!");
-    printf("%d\n",10);
-    printf("1 + 2 = %d, %x\n", 1 + 2, 0x1234abcd);
+    printf("%d\n",12);
+    printf("1 + 2 + 3 = %d, %x\n", 1 + 2 + 3, 0x1234abcd);
+    char s1[4];
+    const char *s2 = "abc";
+    strcpy(s1, s2);
+    printf("%s,%s,strcpy then strcmp result:%d\n", s1, s2, strcmp(s1, s2));
+    const char *s3 = "def";
+    memcpy(s1, s3, 4);
+    printf("%s,%s,memcpy then strcmp result:%d\n", s1, s3, strcmp(s1, s3));
+    memset(s1, 'g',3);
+    printf("%s, memset then strcmp result:%d\n", s1, strcmp(s1, "ggg"));
+    printf("%s,%s, strcmp result:%d\n", s1, s2, strcmp(s1, s2));
     for (;;) {
         __asm__ __volatile__("wfi");
     }
