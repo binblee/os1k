@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "common.h"
 typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;
 typedef uint32_t size_t;
@@ -119,11 +120,29 @@ void handle_trap(struct trap_frame *f) {
     PANIC("unexpected trap scause=%x, stval=%x, sepc=%x\n", scause, stval, user_pc);
 }
 
+extern char __free_ram[], __free_ram_end[];
+
+paddr_t alloc_pages(uint32_t n){
+    static paddr_t next_paddr = (paddr_t) __free_ram;
+    paddr_t paddr = next_paddr;
+    if(paddr + n * PAGE_SIZE > (paddr_t)__free_ram_end){
+        PANIC("out of memory.");
+    }
+    next_paddr += n * PAGE_SIZE;
+    memset((void *)paddr, 0, n * PAGE_SIZE);
+    return paddr;
+}
+
 void kernel_main(void) {
     memset(__bss, 0, (size_t) __bss_end - (size_t) __bss);
-    printf("Hello World!\n");
+    printf("set kernel_entry ...\n");
     WRITE_CSR(stvec, (uint32_t) kernel_entry);
-    __asm__ __volatile__("unimp");
+    int n1 = 1;
+    paddr_t addr1 = alloc_pages(n1);
+    int n2 = 2;
+    paddr_t addr2 = alloc_pages(n2);
+    printf("alloc pages: paddr=%x, size=%d,paddr=%x, size=%d\n", addr1, n1, addr2, n2);
+    PANIC("booted.");
 }
 
 __attribute__((section(".text.boot")))
