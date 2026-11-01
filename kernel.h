@@ -56,6 +56,7 @@ struct trap_frame {
 #define PROCS_MAX 8
 #define PROC_UNUSED 0
 #define PROC_RUNNABLE 1
+#define PROC_EXITED 2
 
 struct process {
     int pid;
@@ -77,3 +78,4 @@ struct process {
 #define USER_BASE 0x1000000
 
 #define SSTATUS_SPIE (1 << 5)
+#define SCAUSE_ECALL 8
